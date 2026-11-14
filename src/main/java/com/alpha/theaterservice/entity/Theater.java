@@ -25,7 +25,7 @@ public class Theater {
 
     private String city;
 
-    private String contactnumber;
+    private long contact;
 
     private String mailid;
 
@@ -36,7 +36,7 @@ public class Theater {
     @OneToOne(cascade = CascadeType.ALL)
     private Address address;
 
-    @OneToMany(mappedBy = "theater",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany
     private List<Show> allplayingshows;
 
     // Default Constructor
@@ -45,7 +45,7 @@ public class Theater {
 
     // Parameterized Constructor
     public Theater( String name, String description,
-                   String city, String contactnumber, String mailid,
+                   String city, long contact, String mailid,
                    int totalscreens, String status, Address address,
                    List<Show> allplayingshows) {
 
@@ -53,7 +53,7 @@ public class Theater {
         this.name = name;
         this.description = description;
         this.city = city;
-        this.contactnumber = contactnumber;
+        this.contact = contact;
         this.mailid = mailid;
         this.totalscreens = totalscreens;
         this.status = status;
@@ -87,12 +87,12 @@ public class Theater {
         this.city = city;
     }
 
-    public String getContactnumber() {
-        return contactnumber;
+    public long getContact() {
+        return contact;
     }
 
-    public void setContactnumber(String contactnumber) {
-        this.contactnumber = contactnumber;
+    public void setContact(long contact) {
+        this.contact = contact;
     }
 
     public String getMailid() {
@@ -138,7 +138,7 @@ public class Theater {
 	@Override
 	public String toString() {
 		return "Theater [id=" + id + ", name=" + name + ", description=" + description + ", city=" + city
-				+ ", contactnumber=" + contactnumber + ", mailid=" + mailid + ", totalscreens=" + totalscreens
+				+ ", contact=" + contact + ", mailid=" + mailid + ", totalscreens=" + totalscreens
 				+ ", status=" + status + ", address=" + address + ", allplayingshows=" + allplayingshows + "]";
 	}
     

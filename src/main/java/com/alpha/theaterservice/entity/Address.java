@@ -17,42 +17,65 @@ public class Address {
     private String state;
 
     private String city;
+    
+    private String distric;
+    private int pincode;
+    
+    public Address( String country, String state, String city, String distric, int pincode) {
+		super();
+		
+		this.country = country;
+		this.state = state;
+		this.city = city;
+		this.distric = distric;
+		this.pincode = pincode;
+	}
 
-    // Default Constructor
-    public Address() {
-    }
+	public Address() {
+		super();
+	}
 
-    // Parameterized Constructor
-    public Address( String country, String state, String city) {
-       
-        this.country = country;
-        this.state = state;
-        this.city = city;
-    }
+	public String getCountry() {
+		return country;
+	}
 
-    // Getters and Setters
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-    public String getCountry() {
-        return country;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    public String getState() {
-        return state;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public void setState(String state) {
-        this.state = state;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public String getCity() {
-        return city;
-    }
+	public String getDistric() {
+		return distric;
+	}
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+	public void setDistric(String distric) {
+		this.distric = distric;
+	}
+
+	public int getPincode() {
+		return pincode;
+	}
+
+	public void setPincode(int pincode) {
+		this.pincode = pincode;
+	}
+
+    
+    
+   
 }
