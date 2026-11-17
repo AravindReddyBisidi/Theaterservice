@@ -19,6 +19,7 @@ public class Address {
     private String city;
     
     private String distric;
+    
     private int pincode;
     
     public Address( String country, String state, String city, String distric, int pincode) {

@@ -1,11 +1,13 @@
 package com.alpha.theaterservice.entity;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 
 @Entity
 public class Show {
@@ -24,6 +26,10 @@ public class Show {
 
     private int screenno;
 
+    private LocalDate showDate;
+
+    private LocalTime showTime;
+
     @ManyToOne
     private Movie movie;
 
@@ -35,21 +41,26 @@ public class Show {
     }
 
     // Parameterized Constructor
-    public Show( String title, String description, double duration,
-                String language, int screenno, Movie movie, Theater theater) {
-       
+    public Show(String title, String description, double duration,
+                String language, int screenno, LocalDate showDate,
+                LocalTime showTime, Movie movie, Theater theater) {
+
         this.title = title;
         this.description = description;
         this.duration = duration;
         this.language = language;
         this.screenno = screenno;
+        this.showDate = showDate;
+        this.showTime = showTime;
         this.movie = movie;
         this.theater = theater;
     }
 
     // Getters and Setters
 
-   
+    public long getId() {
+        return id;
+    }
 
     public String getTitle() {
         return title;
@@ -89,6 +100,22 @@ public class Show {
 
     public void setScreenno(int screenno) {
         this.screenno = screenno;
+    }
+
+    public LocalDate getShowDate() {
+        return showDate;
+    }
+
+    public void setShowDate(LocalDate showDate) {
+        this.showDate = showDate;
+    }
+
+    public LocalTime getShowTime() {
+        return showTime;
+    }
+
+    public void setShowTime(LocalTime showTime) {
+        this.showTime = showTime;
     }
 
     public Movie getMovie() {
