@@ -17,29 +17,29 @@ import com.alpha.theaterservice.entity.Movie;
 import com.alpha.theaterservice.service.MovieService;
 
 @RestController
-public class MovieController {
+public class AdminController {
 	
 	@Autowired
 	MovieService movieservice;
 
-	@PostMapping("/movie/createmovie")
+	@PostMapping("/admin/movie/createmovie")
 	public ResponseEntity<ResponseStructure<Movie>> createMovie(@RequestBody CreateMovieDto createmoviedto) {
 		return movieservice.createMovie(createmoviedto);
 	}
 	
-	@GetMapping("/findmovie")
+	@GetMapping("/admin/findmovie")
 	public ResponseEntity<ResponseStructure<Movie>> findMovie(@RequestParam long id) {
 		System.out.println("finding movie by id: "+id);
 		return movieservice.findMovie(id);
 	}
 	
-	@DeleteMapping("/deletemovie")
+	@DeleteMapping("/admin/deletemovie")
 	public ResponseEntity<ResponseStructure<Movie>> deleteMovie(long id) {
 		System.out.println("Deleting movie by id:"+id);
 		return movieservice.deleteMovie(id);
 	}
 	
-	@GetMapping("/movie/getallmovies")
+	@GetMapping("/admin/movie/getallmovies")
 	public ResponseEntity<ResponseStructure<List<Movie>>> getAllMovies() {
 		System.out.println("getting all movies");
 		return movieservice.getAllMovies();

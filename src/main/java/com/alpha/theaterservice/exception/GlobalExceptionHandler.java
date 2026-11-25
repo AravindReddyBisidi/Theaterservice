@@ -57,12 +57,39 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<ResponseStructure<String>>(responseStructure,HttpStatus.FOUND);
 	}
 	
-	@ExceptionHandler(showNotFoundByIdException.class)
+	@ExceptionHandler(ShowNotFoundByIdException.class)
 	public ResponseEntity<ResponseStructure<String>> handelrshowNotFoundByIdException() {
 		ResponseStructure<String> responseStructure=new ResponseStructure<String>();
 		responseStructure.setStatuscode(HttpStatus.NOT_FOUND.value());
 		responseStructure.setMessage("show Not Found");
 		responseStructure.setData(null);
 		return new ResponseEntity<ResponseStructure<String>>(responseStructure,HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(MoviesNotAvailableException.class)
+	public ResponseStructure<String> handelrMoviesNotAvailableException() {
+		ResponseStructure<String> responseStructure=new ResponseStructure<String>();
+		responseStructure.setStatuscode(HttpStatus.NOT_FOUND.value());
+		responseStructure.setMessage("movie Not Found");
+		responseStructure.setData(null);
+		return responseStructure;
+	}
+	
+	@ExceptionHandler(SeatsNotFoundException.class)
+	public ResponseStructure<String> handlerSeatsNotFoundException() {
+		ResponseStructure<String> responseStructure=new ResponseStructure<String>();
+		responseStructure.setStatuscode(HttpStatus.NOT_FOUND.value());
+		responseStructure.setMessage("Seats Not found ");
+		responseStructure.setData(null);
+		return responseStructure;
+	}
+	
+	@ExceptionHandler(SeatsAlreadyBookedException.class)
+	public ResponseStructure<String> handlerSeatsAlreadyBookedException() {
+		ResponseStructure<String> responseStructure=new ResponseStructure<String>();
+		responseStructure.setStatuscode(HttpStatus.FOUND.value());
+		responseStructure.setMessage("Seats Already Exist ");
+		responseStructure.setData(null);
+		return responseStructure;
 	}
 }

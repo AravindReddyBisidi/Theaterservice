@@ -21,13 +21,14 @@ public class CreateShowDto {
 
     private long movieId;
 
-    private long theaterId;
+//    private long theaterId;
     
+    private int capacitySeats;
     
 
 
     public CreateShowDto(String title, String description, double duration, String language, int screenno,
-			LocalDate showDate, LocalTime showTime, long movieId, long theaterId) {
+			LocalDate showDate, LocalTime showTime, long movieId,int capacitySeats) {
 		super();
 		this.title = title;
 		this.description = description;
@@ -37,7 +38,8 @@ public class CreateShowDto {
 		this.showDate = showDate;
 		this.showTime = showTime;
 		this.movieId = movieId;
-		this.theaterId = theaterId;
+//		this.theaterId = theaterId;
+		this.capacitySeats=capacitySeats;
 	}
     
     
@@ -113,22 +115,28 @@ public class CreateShowDto {
         this.movieId = movieId;
     }
 
-    public long getTheaterId() {
-        return theaterId;
-    }
+//    public long getTheaterId() {
+//        return theaterId;
+//    }
+//
+//    public void setTheaterId(long theaterId) {
+//        this.theaterId = theaterId;
+//    }
+    
+	public int getCapacitySeats() {
+		return capacitySeats;
+	}
 
-    public void setTheaterId(long theaterId) {
-        this.theaterId = theaterId;
-    }
-
-
-
-	@Override
+	public void setCapacitySeats(int capacitySeats) {
+		this.capacitySeats = capacitySeats;
+	}
+	
+    @Override
 	public String toString() {
 		return "CreateShowDto [title=" + title + ", description=" + description + ", duration=" + duration
 				+ ", language=" + language + ", screenno=" + screenno + ", showDate=" + showDate + ", showTime="
-				+ showTime + ", movieId=" + movieId + ", theaterId=" + theaterId + "]";
+				+ showTime + ", movieId=" + movieId + ", capacitySeats=" + capacitySeats
+				+ "]";
 	}
-    
-    
+
 }

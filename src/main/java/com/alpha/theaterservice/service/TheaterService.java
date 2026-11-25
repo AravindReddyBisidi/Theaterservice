@@ -1,5 +1,7 @@
 package com.alpha.theaterservice.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,12 +15,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.alpha.theaterservice.dto.CreateTheaterDto;
 import com.alpha.theaterservice.dto.ResponseStructure;
 import com.alpha.theaterservice.dto.UpdateShowDto;
+import com.alpha.theaterservice.entity.Movie;
 import com.alpha.theaterservice.entity.Show;
 import com.alpha.theaterservice.entity.Theater;
+import com.alpha.theaterservice.exception.MovieNotFoundWithIdExpection;
+import com.alpha.theaterservice.exception.MoviesNotAvailableException;
 import com.alpha.theaterservice.exception.ShowAlreadyExistException;
+import com.alpha.theaterservice.exception.ShowNotFoundByIdException;
 import com.alpha.theaterservice.exception.TheaterAlreadyExistWithContactException;
 import com.alpha.theaterservice.exception.TheaterNOtFoundWithIdException;
-import com.alpha.theaterservice.exception.showNotFoundByIdException;
+import com.alpha.theaterservice.repository.MovieRepository;
 import com.alpha.theaterservice.repository.ShowRepository;
 import com.alpha.theaterservice.repository.TheaterRepository;
 
@@ -30,6 +36,9 @@ public class TheaterService {
 
 	@Autowired
 	ShowRepository showrepository;
+	
+	@Autowired
+	MovieRepository movieRepository;
 	
 	
 	public ResponseEntity<ResponseStructure<Theater>> createTheaterAccount(CreateTheaterDto createTheaterDto) {
@@ -110,7 +119,7 @@ public class TheaterService {
 
 
 	public ResponseEntity<ResponseStructure<Show>> findShow(long id) {
-		Show getshow=showrepository.findById(id).orElseThrow(()->new showNotFoundByIdException());
+		Show getshow=showrepository.findById(id).orElseThrow(()->new ShowNotFoundByIdException());
 		ResponseStructure<Show> responseStructure=new ResponseStructure<Show>();
 		responseStructure.setStatuscode(HttpStatus.FOUND.value());
 		responseStructure.setMessage("show found");
@@ -121,7 +130,7 @@ public class TheaterService {
 
 
 	public ResponseEntity<ResponseStructure<Show>> updateShow(UpdateShowDto updateShowDto) {
-		Show updateShow=showrepository.findById(updateShowDto.getId()).orElseThrow(()-> new showNotFoundByIdException());
+		Show updateShow=showrepository.findById(updateShowDto.getId()).orElseThrow(()-> new ShowNotFoundByIdException());
 		boolean exist = showrepository.existsByShowDateAndShowTimeAndScreennoAndIdNot(updateShowDto.getShowDate(),updateShowDto.getShowTime(),updateShowDto.getScreenno(),updateShowDto.getId());
 			if (exist) {
 			    throw new ShowAlreadyExistException();
@@ -137,7 +146,57 @@ public class TheaterService {
 		return new ResponseEntity<ResponseStructure<Show>>(responseStructure,HttpStatus.ACCEPTED);
 		
 	}
-	
+
+
+	public ResponseEntity<ResponseStructure<Movie>> findmovie(String title) { 
+
+	    Movie getmovie = movieRepository.findByTitleIgnoreCase(title).orElseThrow(() -> new MoviesNotAvailableException());
+	    System.out.println(getmovie.getTitle());
+	    ResponseStructure<Movie> responseStructure = new ResponseStructure<>();
+
+	    responseStructure.setStatuscode(HttpStatus.OK.value());
+	    responseStructure.setMessage("Movie found");
+	    responseStructure.setData(getmovie);
+
+	    return new ResponseEntity<>(responseStructure, HttpStatus.OK);
+	}
+
+
+	public ResponseStructure<Optional<List<Show>>> findingTheatersByMovieName(String title, String language, LocalDate showdate) {
+		List<Show> s = showrepository.findByTitleContainingIgnoreCase(title);		
+		List<Show> getShows = new ArrayList<>();
+		boolean IsLangPresent=false;
+		boolean IsMoviePresentWithDate=false;
+		ResponseStructure<Optional<List<Show>>> rs = new ResponseStructure<>();
+		for(Show movie: s) {
+			String lang=movie.getLanguage();
+			LocalDate Ldate = movie.getShowDate();
+			IsLangPresent=lang.equalsIgnoreCase(language);
+			IsMoviePresentWithDate=Ldate.isEqual(showdate);
+			if(IsLangPresent&&IsMoviePresentWithDate) {
+				getShows.add(movie);
+			}
+		}
+		if(s.isEmpty()) {
+			rs.setStatuscode(HttpStatus.NOT_FOUND.value());
+			rs.setMessage("Movie Not Found");
+			rs.setData(null);
+		}
+		else if(getShows.isEmpty() && !IsLangPresent) {
+			rs.setStatuscode(HttpStatus.NOT_FOUND.value());
+			rs.setMessage("Movie Not Found By Language");
+			rs.setData(null);
+		}else if (getShows.isEmpty()&&!IsMoviePresentWithDate) {
+			rs.setStatuscode(HttpStatus.NOT_FOUND.value());
+			rs.setMessage("Movie Not Found By Date");
+			rs.setData(null);
+		}else {
+			rs.setStatuscode(HttpStatus.FOUND.value());
+			rs.setMessage("Shows found with the Movie name, Language and Date");
+			rs.setData(Optional.of(getShows));
+		}
+		return rs;
+	}
 	
 }
 	

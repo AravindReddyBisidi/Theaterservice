@@ -5,6 +5,7 @@ public class ResponseStructure<T> {
 	private int statuscode;
 	private String message;
 	private T data;
+	
 	public ResponseStructure(int statuscode, String message, T data) {
 		super();
 		this.statuscode = statuscode;
