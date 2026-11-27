@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alpha.theaterservice.dto.CreateTheaterDto;
 import com.alpha.theaterservice.dto.ResponseStructure;
 import com.alpha.theaterservice.dto.UpdateShowDto;
+import com.alpha.theaterservice.dto.UpdateTheaterDto;
 import com.alpha.theaterservice.entity.Movie;
 import com.alpha.theaterservice.entity.Show;
 import com.alpha.theaterservice.entity.Theater;
@@ -72,6 +74,34 @@ public class TheaterController {
 		return theaterservice.findingTheatersByMovieName(title,language,showdate);
 	} 
  
-	
-	
+	@PutMapping("/theater/updateaccount")
+	public ResponseStructure<Theater> updateTheaterAccount(@RequestParam long id,@RequestBody UpdateTheaterDto updateTheaterDto) {
+		return theaterservice.updateTheaterAccount(id,updateTheaterDto);
+	}
+//----------------------------------------------------------------------------------------------------
+	@DeleteMapping("/theater/show/delete")
+	public ResponseStructure<Show> deleteshow(@RequestParam long theaterid,@RequestParam long showid) {
+		
+	return	theaterservice.deleteshow(theaterid,showid);
+	}
+//-------------------------------------------------------------------------------------------------------
+	@GetMapping("/theater/show/findbydate")
+	public ResponseStructure<List<Show>> findByshowWithDate(@RequestParam long theaterid ,@RequestParam LocalDate showdate) {
+		return  theaterservice.findByshowWithDate(theaterid,showdate);
+	}
+//-------------------------------------------------------------------------------------------------------------
+	@GetMapping("/theater/show/findbymovie")
+	public ResponseStructure<List<Show>> findShowByTheaterId(@RequestParam long theaterid) {
+		return theaterservice.findShowByTheaterId(theaterid); 
+	}
+//----------------------------------------------------------------------------------------------------------
+	@GetMapping("/theater/show/findbyscreenno")
+  public ResponseStructure<List<Show>> findByScreenno(@RequestParam long theaterid,int screenno ) {
+	return theaterservice.findByScreenno(theaterid,screenno);  
+  }
+
+	@GetMapping("/theater/show/getshowdetails")
+	public ResponseStructure<Show> getShowDetails(@RequestParam long theaterid,@RequestParam long showid) {
+		return  theaterservice.getShowDetails(theaterid,showid);
+	}
 }

@@ -137,90 +137,64 @@ public Object createshow(CreateShowDto show,long theatreid) {
 		return new ResponseEntity<ResponseStructure<Show>>(rs,HttpStatus.CREATED);
 	}
 //------------------------------------------------------------------------------------------
-public ResponseStructure<List<SeatResponseDto>> getAvailableSeats(long id) {
-    System.out.println("Received Show ID: " + id);
-    Show getshow = showrepository.findById(id).orElseThrow(() -> new ShowNotFoundByIdException());
-    List<Seats> seats = getshow.getSeats();
-    List<SeatResponseDto> seatResponseList = new ArrayList<>();
+public ResponseStructure<List<SeatResponseDto>> getAvailableSeats(long showId) {
+    List<Seats> seats = seatRepository.findByShow_IdAndStatus(showId, "AVAILABLE");
+    List<SeatResponseDto> availableSeats = new ArrayList<>();
     for (Seats seat : seats) {
-        SeatResponseDto dto = new SeatResponseDto();
-        dto.setId(seat.getId());
-        dto.setSeatno(seat.getSeatno());
-        dto.setCategory(seat.getCategory());
-        dto.setPrice(seat.getPrice());
+        String key = "lockseat:" + showId + ":" + seat.getSeatno();
+        Boolean isLocked = redisTemplate.hasKey(key);
+        
+        if (!Boolean.TRUE.equals(isLocked)) {
 
-        String key = "lockseat:" + id + ":" + seat.getSeatno();
+            SeatResponseDto dto = new SeatResponseDto();
 
-        Object lock = redisTemplate.opsForValue().get(key);
-
-        if ("BOOKED".equalsIgnoreCase(seat.getStatus())) {
-            dto.setStatus("BOOKED");
-        } else if (lock != null) {
-            dto.setStatus("FREEZE");
-        } else {
+            dto.setId(seat.getId());
+            dto.setSeatno(seat.getSeatno());
+            dto.setCategory(seat.getCategory());
+            dto.setPrice(seat.getPrice());
             dto.setStatus("AVAILABLE");
-        }
 
-        seatResponseList.add(dto);
+            availableSeats.add(dto);
+        }
     }
-    ResponseStructure<List<SeatResponseDto>> responseStructure =new ResponseStructure<>();
-    responseStructure.setStatuscode(HttpStatus.OK.value());
-    responseStructure.setMessage("Seats found by show");
-    responseStructure.setData(seatResponseList);
-    
-    return responseStructure;
+    ResponseStructure<List<SeatResponseDto>> response = new ResponseStructure<>();
+    response.setStatuscode(HttpStatus.OK.value());
+    response.setMessage("Available seats fetched successfully");
+    response.setData(availableSeats);
+
+    return response;
 }
 //-------------------------------------------------------------------------------
-public ResponseStructure<List<SeatResponseDto>> bookseats(
-        BookSeatsRequestDto bookSeatsRequestDto) {
-
-    Show getshow = showrepository.findById(bookSeatsRequestDto.getShowId())
-            .orElseThrow(() -> new ShowNotFoundByIdException());
-
-    List<Seats> getseat = seatRepository.findByShow_IdAndIdIn(
-            bookSeatsRequestDto.getShowId(),
-            bookSeatsRequestDto.getSeatIds());
-
-    if (getseat.size() != bookSeatsRequestDto.getSeatIds().size()) {
+public ResponseStructure<List<SeatResponseDto>> bookseats(BookSeatsRequestDto bookSeatsRequestDto) {
+    Show getshow = showrepository.findById(bookSeatsRequestDto.getShowId()).orElseThrow(() -> new ShowNotFoundByIdException());
+    List<Seats> getseat = seatRepository.findByShow_IdAndIdIn(bookSeatsRequestDto.getShowId(),bookSeatsRequestDto.getSeatIds());
+    if (getseat.size() != bookSeatsRequestDto.getSeatIds().size()){
         throw new SeatsNotFoundException();
     }
-
     List<SeatResponseDto> responseList = new ArrayList<>();
-
     for (Seats seat : getseat) {
-
         if (!"AVAILABLE".equalsIgnoreCase(seat.getStatus())) {
             throw new SeatsAlreadyBookedException();
         }
-
-        String key = "lockseat:" + bookSeatsRequestDto.getShowId()
-                + ":" + seat.getSeatno();
-
-        Boolean locked = redisTemplate.opsForValue().setIfAbsent(
-                key,
-                String.valueOf(bookSeatsRequestDto.getCustomerId()),
-                Duration.ofSeconds(300));
-
+        String key = "lockseat:" + bookSeatsRequestDto.getShowId()+ ":" + seat.getSeatno();
+        Boolean locked = redisTemplate.opsForValue().setIfAbsent(key,String.valueOf(bookSeatsRequestDto.getCustomerId()),Duration.ofSeconds(300));
         if (!Boolean.TRUE.equals(locked)) {
             throw new SeatsAlreadyBookedException();
         }
-
         SeatResponseDto dto = new SeatResponseDto();
-
         dto.setId(seat.getId());
         dto.setSeatno(seat.getSeatno());
         dto.setCategory(seat.getCategory());
         dto.setPrice(seat.getPrice());
         dto.setStatus("FREEZE");
-
         responseList.add(dto);
     }
     ResponseStructure<List<SeatResponseDto>> responseStructure =new ResponseStructure<>();
     responseStructure.setStatuscode(HttpStatus.OK.value());
     responseStructure.setMessage("Seats FREEZE successfully");
     responseStructure.setData(responseList);
-
     return responseStructure;
 }
+
 
 }

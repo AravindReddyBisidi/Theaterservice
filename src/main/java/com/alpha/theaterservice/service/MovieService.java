@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.alpha.theaterservice.dto.CreateMovieDto;
 import com.alpha.theaterservice.dto.ResponseStructure;
+import com.alpha.theaterservice.dto.UpdateMovieDto;
 import com.alpha.theaterservice.entity.Movie;
 import com.alpha.theaterservice.exception.MovieAlreadyExistWithTitelException;
 import com.alpha.theaterservice.exception.MovieNotFoundWithIdExpection;
+import com.alpha.theaterservice.exception.MoviesNotAvailableException;
 import com.alpha.theaterservice.repository.MovieRepository;
 
 @Service
@@ -72,6 +74,39 @@ public class MovieService {
 		responseStructure.setData(movie);
 		
 		return new ResponseEntity<ResponseStructure<List<Movie>>>(responseStructure,HttpStatus.FOUND);
+	}
+//----------------------------------------------------------------------------------------------------
+	public ResponseStructure<Movie> updateMovie(UpdateMovieDto updateMovieDto) {
+
+	    Movie updatemovie = movierepository.findByTitleIgnoreCase(updateMovieDto.getTitle()).orElseThrow(() -> new MovieNotFoundWithIdExpection());
+	    updatemovie.setTitle(updateMovieDto.getNewtitle());
+	    updatemovie.setcaste(updateMovieDto.getCaste());
+	    updatemovie.setDescription(updateMovieDto.getDescription());
+	    updatemovie.setDuration(updateMovieDto.getDuration());
+	    updatemovie.setLanguage(updateMovieDto.getLanguage());
+	    Movie movie = movierepository.save(updatemovie);
+	    ResponseStructure<Movie> responseStructure = new ResponseStructure<>();
+	    responseStructure.setStatuscode(HttpStatus.OK.value());
+	    responseStructure.setMessage("Movie updated successfully");
+	    responseStructure.setData(movie);
+	    return responseStructure;
+	}
+
+	public ResponseStructure<List<Movie>> getMovieByName(String title) {
+		List<Movie> movies =movierepository.findByTitleContainsIgnoreCase(title);
+		System.out.println("Movies found: " + movies.size());
+		System.out.println("Movie records: " + movies);
+	    ResponseStructure<List<Movie>> response = new ResponseStructure<>();
+	    if (movies.isEmpty()) {
+	        response.setStatuscode(HttpStatus.NOT_FOUND.value());
+	        response.setMessage("Movie not found");
+	        response.setData(null);
+	        return response;
+	    }
+	    response.setStatuscode(HttpStatus.OK.value());
+	    response.setMessage("Movies found successfully");
+	    response.setData(movies);
+	    return response;
 	}
 
 }

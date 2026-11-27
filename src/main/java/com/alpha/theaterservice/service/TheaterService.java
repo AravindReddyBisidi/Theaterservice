@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.alpha.theaterservice.dto.CreateTheaterDto;
 import com.alpha.theaterservice.dto.ResponseStructure;
 import com.alpha.theaterservice.dto.UpdateShowDto;
+import com.alpha.theaterservice.dto.UpdateTheaterDto;
 import com.alpha.theaterservice.entity.Movie;
 import com.alpha.theaterservice.entity.Show;
 import com.alpha.theaterservice.entity.Theater;
@@ -39,8 +41,7 @@ public class TheaterService {
 	
 	@Autowired
 	MovieRepository movieRepository;
-	
-	
+//--------------------------------------------------------------------------------------------------------------
 	public ResponseEntity<ResponseStructure<Theater>> createTheaterAccount(CreateTheaterDto createTheaterDto) {
 		Optional<Theater> theateroptional =theaterrepository.findByContact(createTheaterDto.getContact());
 		if(theateroptional.isPresent()) {
@@ -61,9 +62,7 @@ public class TheaterService {
 		responseStructure.setMessage("New Theater Created Successfully");
 		responseStructure.setData(savedTheater);
 		
-		return new ResponseEntity<ResponseStructure<Theater>>(responseStructure,HttpStatus.CREATED);
-		
-		
+		return new ResponseEntity<ResponseStructure<Theater>>(responseStructure,HttpStatus.CREATED);	
 	}
 
 
@@ -83,6 +82,8 @@ public class TheaterService {
 //			return new ResponseEntity<ResponseStructure<Theater>>(responseStructure,HttpStatus.NOT_FOUND);
 //		}
 //	}
+	
+//----------------------------------------------------------------------------------------------------------
 	public ResponseEntity<ResponseStructure<Theater>> findtheater(long id) {
 		Theater gettheater=theaterrepository.findById(id).orElseThrow(()->new TheaterNOtFoundWithIdException());
 		ResponseStructure<Theater> responseStructure=new ResponseStructure<Theater>();
@@ -101,10 +102,9 @@ public class TheaterService {
 		responseStructure.setStatuscode(HttpStatus.FOUND.value());
 		responseStructure.setMessage("Theater found");
 //		responseStructure.setData(deletetheater);
-		return new ResponseEntity<ResponseStructure<Theater>>(responseStructure,HttpStatus.FOUND);
-		
+		return new ResponseEntity<ResponseStructure<Theater>>(responseStructure,HttpStatus.FOUND);	
 	}
-
+//----------------------------------------------------------------------------------------------------------------
 	public List<Show> findAllPlayingShow(long id) {
 		Theater foundtheater=theaterrepository.findById(id).orElseThrow(()->new TheaterNOtFoundWithIdException());
 		      List<Show> findallplayingshows=  foundtheater.getAllplayingshows();
@@ -116,8 +116,7 @@ public class TheaterService {
 //		      return new ResponseEntity<ResponseStructure<List<Show>>>(HttpStatus.FOUND);
 		      return findallplayingshows;
 	}
-
-
+//--------------------------------------------------------------------------------------------------------
 	public ResponseEntity<ResponseStructure<Show>> findShow(long id) {
 		Show getshow=showrepository.findById(id).orElseThrow(()->new ShowNotFoundByIdException());
 		ResponseStructure<Show> responseStructure=new ResponseStructure<Show>();
@@ -160,8 +159,7 @@ public class TheaterService {
 
 	    return new ResponseEntity<>(responseStructure, HttpStatus.OK);
 	}
-
-
+//--------------------------------------------------------------------------------------------------------------
 	public ResponseStructure<Optional<List<Show>>> findingTheatersByMovieName(String title, String language, LocalDate showdate) {
 		List<Show> s = showrepository.findByTitleContainingIgnoreCase(title);		
 		List<Show> getShows = new ArrayList<>();
@@ -197,7 +195,93 @@ public class TheaterService {
 		}
 		return rs;
 	}
+//----------------------------------------------------------------------------------------------------------------
+	public ResponseStructure<Theater> updateTheaterAccount(long id, UpdateTheaterDto updateTheaterDto) {
+		Theater theater=theaterrepository.findById(id).orElseThrow(()-> new TheaterNOtFoundWithIdException());
+		theater.setName(updateTheaterDto.getName());
+		theater.setAddress(updateTheaterDto.getAddress());
+		theater.setCity(updateTheaterDto.getCity());
+		theater.setContact(updateTheaterDto.getContact());
+	    theater.setDescription(updateTheaterDto.getDescription());
+		theater.setMailid(updateTheaterDto.getMailid());
+		theater.setStatus(updateTheaterDto.getStatus());
+		theater.setTotalscreens(updateTheaterDto.getTotalscreens());
+		Theater updateTheater=theaterrepository.save(theater);
+		ResponseStructure<Theater> responseStructure=new ResponseStructure<Theater>();
+		responseStructure.setStatuscode(HttpStatus.FOUND.value());
+		responseStructure.setMessage("Theate update succefully by id: "+id);
+		responseStructure.setData(updateTheater);
+		return responseStructure;
+	}
+//------------------------------------------------------------------------------------------------------------
+@Transactional
+	public ResponseStructure<Show> deleteshow(long theaterid, long showid) {
+   Theater getTheater=theaterrepository.findById(theaterid).orElseThrow(()->new TheaterNOtFoundWithIdException());
+	Show getshow=showrepository.findById(showid).orElseThrow(()->new ShowNotFoundByIdException());
 	
+	if(getshow.getTheater()==null || getshow.getTheater().getId()!=theaterid) {
+		throw new ShowNotFoundByIdException();
+	}
+	 showrepository.deleteShowReference(showid);
+          showrepository.delete(getshow);
+          
+     ResponseStructure<Show> responseStructure=new ResponseStructure<Show>();
+     responseStructure.setStatuscode(HttpStatus.FOUND.value());
+     responseStructure.setMessage("Show ID: " + showid + " deleted successfully");
+     responseStructure.setData(getshow);
+     return responseStructure;	
+	}
+
+
+public ResponseStructure<List<Show>> findByshowWithDate(long theaterid, LocalDate showdate) {
+	Theater getTheater=theaterrepository.findById(theaterid).orElseThrow(()->new TheaterNOtFoundWithIdException());
+	 List<Show> shows = showrepository.findByTheater_IdAndShowDate(theaterid, showdate);
+	 if(shows.isEmpty()) {
+		 throw new ShowNotFoundByIdException();
+	 }
+	 ResponseStructure<List<Show>> responseStructure=new ResponseStructure<List<Show>>();
+	 responseStructure.setStatuscode(HttpStatus.FOUND.value());
+	 responseStructure.setMessage("Shows fetched successfully");
+	 responseStructure.setData(shows);
+	return responseStructure;
+}
+//-------------------------------------------------------------------------------------------------------------
+public ResponseStructure<List<Show>> findShowByTheaterId(long theaterid) {
+ Theater getTheater=theaterrepository.findById(theaterid).orElseThrow(()->new TheaterNOtFoundWithIdException());
+       List<Show> show =showrepository.findByTheater_Id(theaterid);
+       if(show.isEmpty()) {
+    	   throw new ShowNotFoundByIdException();
+       }
+       ResponseStructure<List<Show>> responseStructure=new ResponseStructure<List<Show>>();
+       responseStructure.setStatuscode(HttpStatus.FOUND.value());
+       responseStructure.setMessage("Shows and movie details fetched successfully");
+       responseStructure.setData(show);
+       return responseStructure;	               
+   }
+//-------------------------------------------------------------------------------------------------------------
+public ResponseStructure<List<Show>> findByScreenno(long theaterid,int screenno) {
+	Theater getTheater=theaterrepository.findById(theaterid).orElseThrow(()->new TheaterNOtFoundWithIdException());
+	List<Show> getShows=showrepository.findByTheater_IdAndScreenno(theaterid,screenno);
+	if(getShows.isEmpty()) {
+		throw new ShowNotFoundByIdException();
+	}
+	ResponseStructure<List<Show>> responseStructure=new ResponseStructure<List<Show>>();
+	responseStructure.setStatuscode(HttpStatus.FOUND.value());
+	responseStructure.setMessage("Show get successfully by screenno: "+screenno);
+	responseStructure.setData(getShows);
+	return responseStructure; 	
+}
+//---------------------------------------------------------------------------------------------
+public ResponseStructure<Show> getShowDetails(long theaterid, long showid) {
+   Theater getTheater=theaterrepository.findById(theaterid).orElseThrow(()->new TheaterNOtFoundWithIdException());
+    Show show=showrepository.findById(showid).orElseThrow(()->new ShowNotFoundByIdException());
+    ResponseStructure<Show> responseStructure=new ResponseStructure<Show>();
+    responseStructure.setStatuscode(HttpStatus.FOUND.value());
+    responseStructure.setMessage("show get complete details");
+    responseStructure.setData(show);
+    return responseStructure;
+}	
+
 }
 	
     

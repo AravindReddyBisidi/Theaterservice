@@ -6,18 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alpha.theaterservice.dto.CreateMovieDto;
 import com.alpha.theaterservice.dto.ResponseStructure;
+import com.alpha.theaterservice.dto.UpdateMovieDto;
+import com.alpha.theaterservice.dto.UpdateShowDto;
 import com.alpha.theaterservice.entity.Movie;
 import com.alpha.theaterservice.service.MovieService;
 
 @RestController
-public class AdminController {
+public class MovieController {
 	
 	@Autowired
 	MovieService movieservice;
@@ -44,5 +48,15 @@ public class AdminController {
 		System.out.println("getting all movies");
 		return movieservice.getAllMovies();
 		
+	}
+	@PutMapping("/movie/update")
+	public ResponseStructure<Movie> updateMovie(@RequestBody UpdateMovieDto updateMovieDto ) {
+		return movieservice.updateMovie(updateMovieDto);
+	}
+	
+	@GetMapping("/movie/search")
+	public ResponseStructure<List<Movie>> getMovieByName(@RequestParam String title) {
+		System.out.println("finding by movie title: "+title);
+		return  movieservice.getMovieByName(title);
 	}
 }
